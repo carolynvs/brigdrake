@@ -5,6 +5,7 @@ go 1.15
 replace github.com/mholt/caddy => github.com/caddyserver/caddy/v2 v2.3.0
 
 require (
+	github.com/brigadecore/brigade/sdk/v2 v2.0.0-alpha.1
 	github.com/carolynvs/magex v0.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0 // indirect

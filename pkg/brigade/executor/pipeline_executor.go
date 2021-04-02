@@ -5,13 +5,13 @@ import (
 	"log"
 	"sync"
 
+	"github.com/brigadecore/brigade/sdk/v2/core"
 	"github.com/lovethedrake/brigdrake/pkg/brigade"
 	"github.com/lovethedrake/brigdrake/pkg/drake"
 	"github.com/lovethedrake/drakecore/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/kubernetes"
 )
 
 func executePipeline(
@@ -21,7 +21,7 @@ func executePipeline(
 	workerConfig brigade.WorkerConfig,
 	pipeline config.Pipeline,
 	jobStatusNotifier drake.JobStatusNotifier,
-	kubeClient kubernetes.Interface,
+	apiClient core.APIClient,
 	wg *sync.WaitGroup,
 	errCh chan<- error,
 ) {
@@ -66,6 +66,7 @@ jobsLoop:
 		// we'd like to keep otherwise.
 		select {
 		case <-ctx.Done():
+			apiClient.Events().Cancel(context.TODO(), event.ID)
 			labelSelector := labels.NewSelector()
 			if workerRequirement, rerr := labels.NewRequirement(
 				"worker",

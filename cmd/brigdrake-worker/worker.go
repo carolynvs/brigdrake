@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 
+	"github.com/brigadecore/brigade/sdk/v2/core"
+	"github.com/brigadecore/brigade/sdk/v2/restmachinery"
 	"github.com/lovethedrake/brigdrake/pkg/brigade"
 	"github.com/lovethedrake/brigdrake/pkg/brigade/executor"
 	"github.com/lovethedrake/brigdrake/pkg/signals"
 	"github.com/lovethedrake/brigdrake/pkg/version"
 	"github.com/lovethedrake/drakecore/config"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 func main() {
@@ -22,21 +22,16 @@ func main() {
 		config.SupportedSpecVersions,
 	)
 
-	clientConfig, err := rest.InClusterConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	kubeClient, err := kubernetes.NewForConfig(clientConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var endpoint, token string
+	var allowInsecure bool = true
+	apiClient := core.NewAPIClient(endpoint, token, &restmachinery.APIClientOptions{AllowInsecureConnections: allowInsecure})
 
 	workerConfig, err := brigade.GetWorkerConfigFromEnvironment()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	project, err := brigade.GetProjectFromEnvironmentAndSecret(kubeClient)
+	project, err := brigade.GetProjectFromEnvironmentAndSecret(apiClient.Projects())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +47,7 @@ func main() {
 		project,
 		event,
 		workerConfig,
-		kubeClient,
+		apiClient,
 	); err != nil {
 		log.Fatal(err)
 	}

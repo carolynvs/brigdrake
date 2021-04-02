@@ -6,13 +6,13 @@ import (
 	"os"
 	"sync"
 
+	"github.com/brigadecore/brigade/sdk/v2/core"
 	"github.com/lovethedrake/brigdrake/pkg/brigade"
 	"github.com/lovethedrake/brigdrake/pkg/drake"
 	"github.com/lovethedrake/brigdrake/pkg/drake/brig"
 	"github.com/lovethedrake/brigdrake/pkg/drake/github"
 	"github.com/lovethedrake/drakecore/config"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/kubernetes"
 )
 
 var triggerBuilderFns = map[string]func([]byte) (drake.Trigger, error){
@@ -28,7 +28,7 @@ func ExecuteBuild(
 	project brigade.Project,
 	event brigade.Event,
 	workerConfig brigade.WorkerConfig,
-	kubeClient kubernetes.Interface,
+	apiClient core.APIClient,
 ) error {
 	// nolint: lll
 	possibleDrakefileLocations := []string{
@@ -122,15 +122,8 @@ func ExecuteBuild(
 		return nil
 	}
 
-	// Create build secret
-	if err := createBuildSecret(project, event, kubeClient); err != nil {
-		return err
-	}
-	defer func() {
-		if err := destroyBuildSecret(project, event, kubeClient); err != nil {
-			log.Printf("error destroying build secret: %s", err)
-		}
-	}()
+	// TODO(carolynvs): I have removed the build secret logic, I think it's not needed anymore? Create build secret
+	// It seems to just store info about the worker that picked up the job. If we need this we can store it in mongo perhaps?
 
 	// Execute all pipelines we have identified-- each in their own goroutine
 	wg := &sync.WaitGroup{}
@@ -145,7 +138,7 @@ func ExecuteBuild(
 			workerConfig,
 			p,
 			jsn,
-			kubeClient,
+			apiClient,
 			wg,
 			errCh,
 		)

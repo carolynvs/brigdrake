@@ -1,3 +1,14 @@
+# github.com/brigadecore/brigade/sdk/v2 v2.0.0-alpha.1
+## explicit
+github.com/brigadecore/brigade/sdk/v2
+github.com/brigadecore/brigade/sdk/v2/authn
+github.com/brigadecore/brigade/sdk/v2/authz
+github.com/brigadecore/brigade/sdk/v2/core
+github.com/brigadecore/brigade/sdk/v2/internal/restmachinery
+github.com/brigadecore/brigade/sdk/v2/lib/authz
+github.com/brigadecore/brigade/sdk/v2/meta
+github.com/brigadecore/brigade/sdk/v2/restmachinery
+github.com/brigadecore/brigade/sdk/v2/system
 # github.com/carolynvs/magex v0.5.0
 ## explicit
 github.com/carolynvs/magex/mgx
@@ -34,6 +45,10 @@ github.com/google/gofuzz
 github.com/googleapis/gnostic/compiler
 github.com/googleapis/gnostic/extensions
 github.com/googleapis/gnostic/openapiv2
+# github.com/hashicorp/go-cleanhttp v0.5.1
+github.com/hashicorp/go-cleanhttp
+# github.com/hashicorp/go-retryablehttp v0.6.7
+github.com/hashicorp/go-retryablehttp
 # github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
 # github.com/kelseyhightower/envconfig v1.4.0
