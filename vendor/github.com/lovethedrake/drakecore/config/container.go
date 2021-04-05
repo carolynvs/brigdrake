@@ -1,10 +1,7 @@
 package config
 
-type ImagePullPolicy string
-
-const (
-	ImagePullPolicyIfNotPresent ImagePullPolicy = "IfNotPresent"
-	ImagePullPolicyAlways       ImagePullPolicy = "Always"
+import (
+	"github.com/brigadecore/brigade/sdk/v2/core"
 )
 
 // Container is a public interface for container configuration.
@@ -16,7 +13,7 @@ type Container interface {
 	// ImagePullPolicy returns the name of the pull policy, which indicates
 	// whether to settle for existing images (if they already exist) or attempt
 	// to refresh them by re-pulling
-	ImagePullPolicy() ImagePullPolicy
+	ImagePullPolicy() core.ImagePullPolicy
 	// Environment returns container-specific environment variables
 	Environment() []string
 	// WorkingDirectory returns the container's working directory
@@ -45,19 +42,19 @@ type Container interface {
 }
 
 type container struct {
-	ContainerName           string          `json:"name"`
-	Img                     string          `json:"image"`
-	ImgPullPolicy           ImagePullPolicy `json:"imagePullPolicy"`
-	Env                     []string        `json:"environment"`
-	WorkDir                 string          `json:"workingDirectory"`
-	Cmd                     []string        `json:"command"`
-	Arguments               []string        `json:"args"`
-	IsTTY                   bool            `json:"tty"`
-	IsPrivileged            bool            `json:"privileged"`
-	ShouldMountDockerSocket bool            `json:"mountDockerSocket"`
-	SrcMountPath            string          `json:"sourceMountPath"`
-	SharedStrgMountPath     string          `json:"sharedStorageMountPath"`
-	Resourcez               *resources      `json:"resources"`
+	ContainerName           string               `json:"name"`
+	Img                     string               `json:"image"`
+	ImgPullPolicy           core.ImagePullPolicy `json:"imagePullPolicy"`
+	Env                     []string             `json:"environment"`
+	WorkDir                 string               `json:"workingDirectory"`
+	Cmd                     []string             `json:"command"`
+	Arguments               []string             `json:"args"`
+	IsTTY                   bool                 `json:"tty"`
+	IsPrivileged            bool                 `json:"privileged"`
+	ShouldMountDockerSocket bool                 `json:"mountDockerSocket"`
+	SrcMountPath            string               `json:"sourceMountPath"`
+	SharedStrgMountPath     string               `json:"sharedStorageMountPath"`
+	Resourcez               *resources           `json:"resources"`
 }
 
 func (c *container) Name() string {
@@ -68,9 +65,9 @@ func (c *container) Image() string {
 	return c.Img
 }
 
-func (c *container) ImagePullPolicy() ImagePullPolicy {
+func (c *container) ImagePullPolicy() core.ImagePullPolicy {
 	if c.ImgPullPolicy == "" {
-		return ImagePullPolicyIfNotPresent
+		return core.ImagePullPolicyIfNotPresent
 	}
 	return c.ImgPullPolicy
 }
