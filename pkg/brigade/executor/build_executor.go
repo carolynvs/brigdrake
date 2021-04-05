@@ -25,9 +25,7 @@ var triggerBuilderFns = map[string]func([]byte) (drake.Trigger, error){
 // as a Kubernetes client.
 func ExecuteBuild(
 	ctx context.Context,
-	project brigade.Project,
 	event brigade.Event,
-	workerConfig brigade.WorkerConfig,
 	apiClient core.APIClient,
 ) error {
 	// nolint: lll
@@ -100,7 +98,7 @@ func ExecuteBuild(
 				)
 			}
 			if meetsCriteria {
-				jsn, err := trigger.JobStatusNotifier(project, event)
+				jsn, err := trigger.JobStatusNotifier(event)
 				if err != nil {
 					return errors.Wrapf(
 						err,
@@ -122,9 +120,6 @@ func ExecuteBuild(
 		return nil
 	}
 
-	// TODO(carolynvs): I have removed the build secret logic, I think it's not needed anymore? Create build secret
-	// It seems to just store info about the worker that picked up the job. If we need this we can store it in mongo perhaps?
-
 	// Execute all pipelines we have identified-- each in their own goroutine
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error)
@@ -133,9 +128,7 @@ func ExecuteBuild(
 		wg.Add(1)
 		go executePipeline(
 			ctx,
-			project,
 			event,
-			workerConfig,
 			p,
 			jsn,
 			apiClient,

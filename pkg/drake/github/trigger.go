@@ -27,10 +27,10 @@ func NewTriggerFromJSON(jsonBytes []byte) (drake.Trigger, error) {
 }
 
 func (t *trigger) Matches(event brigade.Event) (bool, error) {
-	if event.Provider != "github" {
+	if event.Source != "github" {
 		log.Printf(
 			"event from provider %q does not match github trigger",
-			event.Provider,
+			event.Source,
 		)
 		return false, nil
 	}
@@ -90,9 +90,9 @@ func (t *trigger) Matches(event brigade.Event) (bool, error) {
 }
 
 func (t *trigger) JobStatusNotifier(
-	project brigade.Project, event brigade.Event,
+	event brigade.Event,
 ) (drake.JobStatusNotifier, error) {
-	appIDStr, ok := project.Secrets["BRIGDRAKE_GITHUB_APP_ID"]
+	appIDStr, ok := event.Project.Secrets["BRIGDRAKE_GITHUB_APP_ID"]
 	if !ok {
 		return nil, nil
 	}
@@ -100,7 +100,7 @@ func (t *trigger) JobStatusNotifier(
 	if err != nil {
 		return nil, nil
 	}
-	githubKey, ok := project.Secrets["BRIGDRAKE_GITHUB_KEY"]
+	githubKey, ok := event.Project.Secrets["BRIGDRAKE_GITHUB_KEY"]
 	if !ok {
 		return nil, nil
 	}
@@ -109,7 +109,7 @@ func (t *trigger) JobStatusNotifier(
 		"pull_request:synchronize",
 		"pull_request:reopened":
 		pre := github.PullRequestEvent{}
-		if err := json.Unmarshal(event.Payload, &pre); err != nil {
+		if err := json.Unmarshal([]byte(event.Payload), &pre); err != nil {
 			return nil, errors.Wrap(err, "error unmarshaling event payload")
 		}
 		return newJobStatusNotifier(
@@ -122,7 +122,7 @@ func (t *trigger) JobStatusNotifier(
 		)
 	case "push":
 		pe := github.PushEvent{}
-		if err := json.Unmarshal(event.Payload, &pe); err != nil {
+		if err := json.Unmarshal([]byte(event.Payload), &pe); err != nil {
 			return nil, errors.Wrap(err, "error unmarshaling event payload")
 		}
 		// We don't want a notifier if this is for a tag push

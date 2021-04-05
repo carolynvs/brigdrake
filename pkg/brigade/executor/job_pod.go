@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/brigadecore/brigade/sdk/v2/core"
 	"github.com/lovethedrake/brigdrake/pkg/brigade"
 	"github.com/lovethedrake/brigdrake/pkg/drake"
 	"github.com/lovethedrake/drakecore/config"
@@ -24,14 +25,13 @@ const (
 	dockerSocketVolumeName  = "docker-socket"
 )
 
-func runJobPod(
+func runJob(
 	ctx context.Context,
-	project brigade.Project,
 	event brigade.Event,
 	pipelineName string,
 	job config.Job,
 	jobStatusNotifier drake.JobStatusNotifier,
-	kubeClient kubernetes.Interface,
+	apiClient core.APIClient,
 ) error {
 	var err error
 	if jobStatusNotifier != nil {
@@ -58,7 +58,7 @@ func runJobPod(
 
 	// TODO: Let's not define the values for these in two places.
 	jobName := fmt.Sprintf("%s-%s", pipelineName, job.Name())
-	podName := fmt.Sprintf("%s-%s", jobName, event.BuildID)
+	podName := fmt.Sprintf("%s-%s", jobName, event.ID)
 
 	var pod *v1.Pod
 	pod, err = buildJobPod(project, event, pipelineName, job)
@@ -138,14 +138,40 @@ func waitForJobPodCompletion(
 	}
 }
 
-func buildJobPod(
-	project brigade.Project,
+func buildJob(
 	event brigade.Event,
 	pipelineName string,
 	job config.Job,
-) (*v1.Pod, error) {
+) (core.Job, error) {
 	jobName := fmt.Sprintf("%s-%s", pipelineName, job.Name())
-	podName := fmt.Sprintf("%s-%s", jobName, event.BuildID)
+	podName := fmt.Sprintf("%s-%s", jobName, event.ID)
+
+	container := job.PrimaryContainer()
+	j := core.Job{
+		Name: podName,
+		Spec: core.JobSpec{
+			PrimaryContainer: core.JobContainerSpec{
+				ContainerSpec: core.ContainerSpec{
+					Image:           container.Image(),
+					ImagePullPolicy: container.ImagePullPolicy(),
+					Command:         nil,
+					Arguments:       nil,
+					Environment:     nil,
+				},
+				WorkingDirectory:    "",
+				WorkspaceMountPath:  "",
+				SourceMountPath:     "",
+				Privileged:          false,
+				UseHostDockerSocket: false,
+			},
+			SidecarContainers: nil,
+			TimeoutSeconds:    0,
+			Host:              nil,
+		},
+	}
+
+	return j, nil
+
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: podName,
@@ -185,7 +211,7 @@ func buildJobPod(
 		},
 	}
 
-	primaryContainer := job.PrimaryContainer()
+	primaryContainer := container
 	sidecarContainers := job.SidecarContainers()
 
 	// All the volumes we might need

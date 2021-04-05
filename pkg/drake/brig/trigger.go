@@ -22,10 +22,10 @@ func NewTriggerFromJSON(jsonBytes []byte) (drake.Trigger, error) {
 }
 
 func (t *trigger) Matches(event brigade.Event) (bool, error) {
-	if event.Provider != "brigade-cli" {
+	if event.Source != "brigade-cli" {
 		log.Printf(
-			"event from provider %q does not match brig trigger",
-			event.Provider,
+			"event from source %q does not match brig trigger",
+			event.Source,
 		)
 		return false, nil
 	}
@@ -42,7 +42,7 @@ func (t *trigger) Matches(event brigade.Event) (bool, error) {
 }
 
 func (t *trigger) JobStatusNotifier(
-	project brigade.Project, event brigade.Event,
+	event brigade.Event,
 ) (drake.JobStatusNotifier, error) {
 	return nil, nil
 }

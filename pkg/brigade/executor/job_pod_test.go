@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brigadecore/brigade/sdk/v2/core"
 	"github.com/lovethedrake/brigdrake/pkg/brigade"
 	"github.com/lovethedrake/drakecore/config"
 	"github.com/stretchr/testify/require"
@@ -365,7 +366,7 @@ func (f *fakeJob) CPUArch() config.CPUArch {
 type fakeContainer struct {
 	name                   string
 	image                  string
-	imagePullPolicy        config.ImagePullPolicy
+	imagePullPolicy        core.ImagePullPolicy
 	environment            []string
 	workingDirectory       string
 	command                []string
@@ -401,7 +402,7 @@ func (f *fakeContainer) Image() string {
 	return f.image
 }
 
-func (f *fakeContainer) ImagePullPolicy() config.ImagePullPolicy {
+func (f *fakeContainer) ImagePullPolicy() core.ImagePullPolicy {
 	return f.imagePullPolicy
 }
 

@@ -10,11 +10,11 @@ import (
 )
 
 // Event represents a Brigade event.
-type EventPayload struct {
+type Event struct {
 	/** A unique identifier for the event. */
 	ID string
 	/** The project that registered the handler being called for the event. */
-	Project ProjectPayload
+	Project Project
 	/** The unique identifier of the gateway which created the event. */
 	Source string
 	/** The type of event. Values and meanings are source-specific. */
@@ -26,17 +26,17 @@ type EventPayload struct {
 	/** The content of the event. This is source- and type-specific. */
 	Payload string
 	/** The Brigade worker assigned to handle the event. */
-	Worker WorkerPayload
+	Worker Worker
 }
 
-type ProjectPayload struct {
+type Project struct {
 	/** The unique identifier of the project. */
 	ID string
 	/** A map of secrets defined in the Brigade project. */
 	Secrets map[string]string
 }
 
-type WorkerPayload struct {
+type Worker struct {
 	/** The address of the Brigade API server. */
 	ApiAddress string
 	/**
@@ -76,14 +76,14 @@ type Revision struct {
 
 // GetEventPayload returns an EventPayload object with values derived from
 // /var/event/event.json
-func GetEventPayload() (EventPayload, error) {
+func GetEventPayload() (Event, error) {
 	payloadPath := "/var/event/event.json"
 	contents, err := ioutil.ReadFile(payloadPath)
 	if err != nil {
-		return EventPayload{}, fmt.Errorf("error reading %s", payloadPath)
+		return Event{}, fmt.Errorf("error reading %s", payloadPath)
 	}
 
-	evt := EventPayload{}
+	evt := Event{}
 	err = json.Unmarshal(contents, &evt)
 	return evt, errors.Wrap(err, "error loading event payload json")
 }

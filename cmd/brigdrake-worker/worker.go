@@ -22,31 +22,19 @@ func main() {
 		config.SupportedSpecVersions,
 	)
 
-	var endpoint, token string
+	event, err := brigade.GetEventPayload()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO(carolynvs): Make this configurable
 	var allowInsecure bool = true
-	apiClient := core.NewAPIClient(endpoint, token, &restmachinery.APIClientOptions{AllowInsecureConnections: allowInsecure})
-
-	workerConfig, err := brigade.GetWorkerConfigFromEnvironment()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	project, err := brigade.GetProjectFromEnvironmentAndSecret(apiClient.Projects())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	event, err := brigade.GetEventFromEnvironment()
-	if err != nil {
-		log.Fatal(err)
-	}
+	apiClient := core.NewAPIClient(event.Worker.ApiAddress, event.Worker.ApiToken, &restmachinery.APIClientOptions{AllowInsecureConnections: allowInsecure})
 
 	ctx := signals.Context()
 	if err = executor.ExecuteBuild(
 		ctx,
-		project,
 		event,
-		workerConfig,
 		apiClient,
 	); err != nil {
 		log.Fatal(err)
